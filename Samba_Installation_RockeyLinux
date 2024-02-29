@@ -1,0 +1,39 @@
+  sudo dnf update
+  
+# Install Samba
+    sudo dnf install samba samba-common
+
+# Create the shared directory
+    sudo mkdir -p /var/local/files
+
+# Set permissions for the shared directory
+    sudo chmod -R 0775 /var/local/files
+    sudo chown -R nobody:nobody /var/local/files
+
+# Edit Samba configuration 
+    vi /etc/samba/smb.conf
+
+# add the following content at the end  - press i (insert) in the keyboard
+    [Files]
+    path = /var/local/files
+    browseable = yes
+    writable = yes
+    guest ok = yes
+    read only = no
+    
+# after copy pasting, press "escape" and then ":wq!" 
+(you will see it in the down left side of the screen) 
+
+# Start and enable Samba services
+    sudo systemctl start smb nmb
+    sudo systemctl enable smb nmb
+
+# Configure firewall to allow Samba
+    sudo firewall-cmd --permanent --zone=public --add-service=samba
+    sudo firewall-cmd --reload
+
+# Adjust SELinux context for the shared directory (if SELinux is enabled)
+    sudo chcon -t samba_share_t /var/local/files
+
+# Check Samba configuration for errors
+    testparm
